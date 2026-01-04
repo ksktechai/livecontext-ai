@@ -1,0 +1,111 @@
+graph TB
+    subgraph Frontend ["Frontend Layer"]
+        UI["React SPA<br/>Vite + TypeScript"]
+    end
+
+    subgraph Backend ["Backend Layer<br/>(Java 25 Spring Boot 4)"]
+        
+        subgraph WebFlux ["WebFlux Controllers"]
+            ChatController["ChatController<br/>/api/chat"]
+            TimelineController["TimelineController<br/>/api/stream SSE"]
+            AlertController["AlertController<br/>/api/alerts"]
+        end
+        
+        LlmSvc["LlmService<br/>Agentic Tool-Calling Loop"]
+        McpClient["McpClientService<br/>HTTP Tool Executor"]
+        IngestSvc["IngestionService<br/>Scheduled Jobs"]
+        TimelineSvc["TimelineService"]
+        
+        DB[("PostgreSQL<br/>timeline_events<br/>news_items<br/>alert_rules")]
+    end
+
+    subgraph McpServers ["MCP Servers (Node.js / TypeScript)"]
+        direction TB
+        %% Invisible spacers to force height - distinct IDs required
+        Spacer1["<br/>"]
+        Spacer2["<br/>"]
+
+        %% Link spacers to force vertical stacking
+        Spacer1 ~~~ Spacer2
+        
+        %% Nodes padded with spaces to force container width
+        MarketMcp["Market MCP:8091 (get_quote, compute_indicators)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        NewsMcp["News MCP:8092 (ingest_rss, search)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        WeatherMcp["Weather MCP:8093 (get_forecast, get_alerts)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        SystemMcp["System MCP:8094 (alerts_create, db_query_readonly)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        
+        %% Force spacers to be above actual nodes
+        Spacer2 ~~~ MarketMcp
+    end
+
+    subgraph AIRuntime ["AI Runtime"]
+        Ollama["Ollama<br/>qwen2.5:7b Model<br/>/api/chat with tools"]
+    end
+
+    subgraph External ["External Data Sources"]
+        Stooq["Stooq.com<br/>CSV Market Data"]
+        RSS["RSS Feeds<br/>Reddit, WSJ"]
+        OpenMeteo["Open-Meteo API<br/>Weather JSON"]
+    end
+
+    UI -->|"HTTP POST"| ChatController
+    UI -->|"SSE Stream"| TimelineController
+    UI -->|"HTTP"| AlertController
+
+    ChatController --> LlmSvc
+    TimelineController --> TimelineSvc
+    AlertController --> DB
+
+    LlmSvc -->|"1. Send question + tools"| Ollama
+    Ollama -->|"2. tool_calls[]"| LlmSvc
+    LlmSvc -->|"3. Execute tools"| McpClient
+    McpClient -->|"4. Return results"| LlmSvc
+    LlmSvc -->|"5. Feed results back"| Ollama
+    Ollama -->|"6. Final answer"| LlmSvc
+
+    McpClient -->|"HTTP POST"| MarketMcp
+    McpClient -->|"HTTP POST"| NewsMcp
+    McpClient -->|"HTTP POST"| WeatherMcp
+    McpClient -->|"HTTP POST"| SystemMcp
+
+    MarketMcp -->|"CSV Fetch"| Stooq
+    NewsMcp -->|"Feed Parse"| RSS
+    WeatherMcp -->|"API Call"| OpenMeteo
+    SystemMcp -->|"SQL Query"| DB
+
+    IngestSvc -->|"Scheduled"| McpClient
+    IngestSvc -->|"Store Events"| DB
+    TimelineSvc -->|"Read Events"| DB
+
+    classDef frontend fill:#e1f5ff,stroke:#01579b
+    classDef backend fill:#fff9c4,stroke:#f57f17
+    classDef mcp fill:#f3e5f5,stroke:#4a148c
+    classDef external fill:#e8f5e9,stroke:#1b5e20
+    classDef ai fill:#ffe0b2,stroke:#e65100
+    classDef db fill:#fce4ec,stroke:#880e4f
+
+    class UI frontend
+    class API,ChatController,TimelineController,AlertController,LlmSvc,McpClient,IngestSvc,TimelineSvc backend
+    class MarketMcp,NewsMcp,WeatherMcp,SystemMcp mcp
+    class Stooq,RSS,OpenMeteo external
+    class Ollama ai
+    class DB db
+
+    linkStyle 6,7,10,11 stroke:orange,stroke-width:2px,color:orange;
+    linkStyle 8,9 stroke:purple,stroke-width:2px,color:purple;
+    linkStyle 12,13,14,15 stroke:purple,stroke-width:1px,stroke-dasharray: 5 5;
+
+    %% Subgraph Styles
+    style Frontend fill:#f0f8ff,stroke:#01579b,stroke-width:2px,color:black
+    style Backend fill:#fffde7,stroke:#f57f17,stroke-width:2px,color:black
+    style WebFlux fill:#ffffff,stroke:#f57f17,stroke-width:1px,color:black
+    
+    style McpServers fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:black
+    
+    style AIRuntime fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:black
+    style External fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:black
+    
+    %% Spacer Styles (Invisible)
+    style Spacer1 fill:none,stroke:none,color:none
+    style Spacer2 fill:none,stroke:none,color:none
+    style Spacer3 fill:none,stroke:none,color:none

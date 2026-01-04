@@ -1,0 +1,44 @@
+# Java / Gradle
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+*.class
+*.log
+*.jar
+!gradle-wrapper.jar
+
+# Node.js
+node_modules/
+dist/
+*.log
+.npm
+.pnpm-debug.log*
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+
+# Environment
+.env
+.env.local
+*.local
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+
+# Typescript / Testing
+coverage/
+*.tsbuildinfo
+junit.xml
+

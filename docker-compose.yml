@@ -1,0 +1,152 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: livecontext-postgres
+    environment:
+      POSTGRES_USER: livecontext
+      POSTGRES_PASSWORD: livecontext
+      POSTGRES_DB: livecontext
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U livecontext"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: livecontext-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  market-mcp:
+    build:
+      context: ./mcp/market-mcp
+      dockerfile: Dockerfile
+    container_name: livecontext-market-mcp
+    ports:
+      - "8091:8091"
+    environment:
+      - PORT=8091
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8091/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  news-mcp:
+    build:
+      context: ./mcp/news-mcp
+      dockerfile: Dockerfile
+    container_name: livecontext-news-mcp
+    ports:
+      - "8092:8092"
+    environment:
+      - PORT=8092
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8092/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  weather-mcp:
+    build:
+      context: ./mcp/weather-mcp
+      dockerfile: Dockerfile
+    container_name: livecontext-weather-mcp
+    ports:
+      - "8093:8093"
+    environment:
+      - PORT=8093
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8093/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  system-mcp:
+    build:
+      context: ./mcp/system-mcp
+      dockerfile: Dockerfile
+    container_name: livecontext-system-mcp
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8094:8094"
+    environment:
+      - PORT=8094
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://livecontext:livecontext@postgres:5432/livecontext
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8094/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: livecontext-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+      market-mcp:
+        condition: service_healthy
+      news-mcp:
+        condition: service_healthy
+      weather-mcp:
+        condition: service_healthy
+      system-mcp:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/livecontext
+      - SPRING_DATASOURCE_USERNAME=livecontext
+      - SPRING_DATASOURCE_PASSWORD=livecontext
+      - MCP_MARKET_URL=http://market-mcp:8091
+      - MCP_NEWS_URL=http://news-mcp:8092
+      - MCP_WEATHER_URL=http://weather-mcp:8093
+      - MCP_SYSTEM_URL=http://system-mcp:8094
+      - OLLAMA_BASE_URL=http://ollama:11434
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: livecontext-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8080
+
+volumes:
+  postgres-data:
+  ollama-data:

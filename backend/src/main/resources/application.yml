@@ -1,0 +1,107 @@
+spring:
+  application:
+    name: livecontext-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/livecontext
+    username: livecontext
+    password: livecontext
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/livecontext
+    username: livecontext
+    password: livecontext
+    properties:
+      schema: public
+
+  sql:
+    init:
+      mode: always  # Set to 'never' to NOT run schema.sql on startup
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.ai.livecontext: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%-5p} %style{%pid}{magenta} --- [%15.15t] %style{[%X{correlationId}]}{yellow} %style{%-40.40logger{39}}{cyan} : %m%n"
+
+livecontext:
+  mcp:
+    market:
+      url: http://localhost:8091
+      timeout: 10000
+    news:
+      url: http://localhost:8092
+      timeout: 15000
+    weather:
+      url: http://localhost:8093
+      timeout: 10000
+    system:
+      url: http://localhost:8094
+      timeout: 5000
+
+  ollama:
+    base-url: http://localhost:11434
+    model: qwen2.5:7b
+    timeout: 30000
+    mock-mode: false
+
+  ingestion:
+    news:
+      enabled: true
+      cron: "0 */5 * * * *"
+      feeds: https://www.reddit.com/r/artificial/.rss,https://feeds.a.dj.com/rss/RSSMarketsMain.xml
+    market:
+      enabled: true
+      cron: "0 */1 * * * *"
+      symbols: AAPL.US,TSLA.US,GOOGL.US
+    weather:
+      enabled: true
+      cron: "0 */15 * * * *"
+      locations:
+        - latitude: 40.7128
+          longitude: -74.0060
+          name: "Chennai"
+
+  retention:
+    timeline-days: 7
+    news-days: 30
+    cleanup-cron: "0 0 2 * * *"
+
+  cache:
+    quote-ttl-minutes: 5
+    quote-max-size: 100
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/livecontext
+
+livecontext:
+  mcp:
+    market:
+      url: http://market-mcp:8091
+    news:
+      url: http://news-mcp:8092
+    weather:
+      url: http://weather-mcp:8093
+    system:
+      url: http://system-mcp:8094
+  ollama:
+    base-url: http://ollama:11434
+    mock-mode: false

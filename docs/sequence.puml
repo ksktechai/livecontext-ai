@@ -1,0 +1,234 @@
+@startuml LiveContext Full System Flow
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 200
+
+' Color definitions
+skinparam participant {
+    BackgroundColor<<frontend>> #E1F5FE
+    BorderColor<<frontend>> #01579B
+    BackgroundColor<<backend>> #FFF9C4
+    BorderColor<<backend>> #F57F17
+    BackgroundColor<<llm>> #FFE0B2
+    BorderColor<<llm>> #E65100
+    BackgroundColor<<mcp>> #F3E5F5
+    BorderColor<<mcp>> #4A148C
+    BackgroundColor<<db>> #FCE4EC
+    BorderColor<<db>> #880E4F
+    BackgroundColor<<external>> #E8F5E9
+    BorderColor<<external>> #1B5E20
+}
+
+skinparam actor {
+    BackgroundColor #E8F5E9
+    BorderColor #1B5E20
+}
+
+title LiveContext-AI: Complete System Flow\n(Agentic Chat + Scheduled Ingestion)
+
+actor User
+participant "Frontend\n(React)" as UI <<frontend>>
+participant "ChatController" as ChatCtrl <<backend>>
+participant "LlmService\n(Agentic Loop)" as LlmSvc <<backend>>
+participant "Ollama\n(qwen2.5:7b)" as Ollama <<llm>>
+participant "IngestionService\n(Scheduled)" as IngestSvc <<backend>>
+participant "McpClientService" as McpClient <<backend>>
+participant "TimelineService" as TimelineSvc <<backend>>
+participant "Market MCP\n:8091" as MarketMcp <<mcp>>
+participant "News MCP\n:8092" as NewsMcp <<mcp>>
+participant "Weather MCP\n:8093" as WeatherMcp <<mcp>>
+participant "System MCP\n:8094" as SystemMcp <<mcp>>
+database "PostgreSQL" as DB <<db>>
+participant "Stooq API" as Stooq <<external>>
+participant "RSS Feeds" as RSS <<external>>
+participant "Open-Meteo" as OpenMeteo <<external>>
+
+== PART 1: Scheduled Ingestion (Every 1-15 min) ==
+
+note over IngestSvc: @Scheduled cron triggers
+
+group Market Ingestion (Every 1 min)
+    IngestSvc -> McpClient: get_quote(AAPL.US, TSLA.US, GOOGL.US)
+    activate McpClient #FFF9C4
+    
+    McpClient -> MarketMcp: POST /tools/get_quote\n{symbol: "TSLA.US"}
+    activate MarketMcp #F3E5F5
+    
+    MarketMcp -> Stooq: GET /q/d/l/?s=tsla.us&i=d
+    activate Stooq #E8F5E9
+    Stooq --> MarketMcp: CSV data
+    deactivate Stooq
+    
+    MarketMcp --> McpClient: {symbol, close, change, volume}
+    deactivate MarketMcp
+    
+    McpClient --> IngestSvc: Quote result
+    deactivate McpClient
+    
+    IngestSvc -> TimelineSvc: addEvent(market, payload)
+    activate TimelineSvc #FFF9C4
+    TimelineSvc -> DB: INSERT INTO timeline_events\n(event_type='market', payload, timestamp)
+    activate DB #FCE4EC
+    DB --> TimelineSvc: OK
+    deactivate DB
+    TimelineSvc --> IngestSvc: Saved
+    deactivate TimelineSvc
+end
+
+group News Ingestion (Every 5 min)
+    IngestSvc -> McpClient: ingest_rss(feedUrl)
+    activate McpClient #FFF9C4
+    
+    McpClient -> NewsMcp: POST /tools/ingest_rss\n{feedUrl: "reddit.com/r/artificial/.rss"}
+    activate NewsMcp #F3E5F5
+    
+    NewsMcp -> RSS: GET RSS feed
+    activate RSS #E8F5E9
+    RSS --> NewsMcp: XML/RSS data
+    deactivate RSS
+    
+    NewsMcp --> McpClient: {items: [{title, link, summary}...]}
+    deactivate NewsMcp
+    
+    McpClient --> IngestSvc: News items
+    deactivate McpClient
+    
+    IngestSvc -> DB: INSERT INTO news_items\n(id, title, link, source, published_at)
+    activate DB #FCE4EC
+    DB --> IngestSvc: OK
+    deactivate DB
+    
+    IngestSvc -> TimelineSvc: addEvent(news, payload)
+    activate TimelineSvc #FFF9C4
+    TimelineSvc -> DB: INSERT INTO timeline_events
+    activate DB #FCE4EC
+    DB --> TimelineSvc: OK
+    deactivate DB
+    deactivate TimelineSvc
+end
+
+group Weather Ingestion (Every 15 min)
+    IngestSvc -> McpClient: get_forecast(lat, lon)
+    activate McpClient #FFF9C4
+    
+    McpClient -> WeatherMcp: POST /tools/get_forecast\n{latitude: 40.71, longitude: -74.00}
+    activate WeatherMcp #F3E5F5
+    
+    WeatherMcp -> OpenMeteo: GET /v1/forecast?lat=40.71&lon=-74.00
+    activate OpenMeteo #E8F5E9
+    OpenMeteo --> WeatherMcp: Weather JSON
+    deactivate OpenMeteo
+    
+    WeatherMcp --> McpClient: {temperature, precipitation, forecast}
+    deactivate WeatherMcp
+    
+    McpClient --> IngestSvc: Weather result
+    deactivate McpClient
+    
+    IngestSvc -> TimelineSvc: addEvent(weather, payload)
+    activate TimelineSvc #FFF9C4
+    TimelineSvc -> DB: INSERT INTO timeline_events\n(event_type='weather', payload)
+    activate DB #FCE4EC
+    DB --> TimelineSvc: OK
+    deactivate DB
+    deactivate TimelineSvc
+end
+
+== PART 2: Agentic Chat Flow ==
+
+User -> UI: "Why did TSLA go up today?"
+activate UI #E1F5FE
+
+UI -> ChatCtrl: POST /api/chat\n{question, correlationId}
+activate ChatCtrl #FFF9C4
+
+ChatCtrl -> LlmSvc: chat(question)
+activate LlmSvc #FFF9C4
+
+LlmSvc -> Ollama: POST /api/chat\n{model, messages, tools[]}
+activate Ollama #FFE0B2
+note right of LlmSvc: Tools: get_quote,\nsearch_news, get_weather
+
+Ollama --> LlmSvc: tool_calls[{get_quote, {symbol: "TSLA.US"}}]
+deactivate Ollama
+
+LlmSvc -> McpClient: executeToolByName("get_quote")
+activate McpClient #FFF9C4
+McpClient -> MarketMcp: POST /tools/get_quote
+activate MarketMcp #F3E5F5
+MarketMcp -> Stooq: Fetch quote
+activate Stooq #E8F5E9
+Stooq --> MarketMcp: Data
+deactivate Stooq
+MarketMcp --> McpClient: Quote result
+deactivate MarketMcp
+McpClient --> LlmSvc: {close: 432.50, change: +2.5%}
+deactivate McpClient
+
+LlmSvc -> Ollama: Feed tool result
+activate Ollama #FFE0B2
+Ollama --> LlmSvc: tool_calls[{search_news, {query: "TSLA"}}]
+deactivate Ollama
+
+LlmSvc -> McpClient: executeToolByName("search_news")
+activate McpClient #FFF9C4
+McpClient -> NewsMcp: POST /tools/search
+activate NewsMcp #F3E5F5
+NewsMcp -> DB: SELECT FROM news_items\nWHERE title ILIKE '%TSLA%'
+activate DB #FCE4EC
+DB --> NewsMcp: News results
+deactivate DB
+NewsMcp --> McpClient: News items
+deactivate NewsMcp
+McpClient --> LlmSvc: [{title, link, summary}...]
+deactivate McpClient
+
+LlmSvc -> Ollama: Feed tool result
+activate Ollama #FFE0B2
+Ollama --> LlmSvc: Final answer:\n"TSLA rose 2.5% to $432.50..."
+deactivate Ollama
+
+LlmSvc --> ChatCtrl: ChatResponse{answer, evidence[]}
+deactivate LlmSvc
+
+ChatCtrl --> UI: 200 OK
+deactivate ChatCtrl
+
+UI -> User: Display answer + sources
+deactivate UI
+
+== PART 3: System MCP (Alerts) ==
+
+User -> UI: Create alert rule
+activate UI #E1F5FE
+UI -> ChatCtrl: POST /api/alerts\n{name, condition}
+activate ChatCtrl #FFF9C4
+
+ChatCtrl -> McpClient: alerts_create
+activate McpClient #FFF9C4
+McpClient -> SystemMcp: POST /tools/alerts_create
+activate SystemMcp #F3E5F5
+SystemMcp -> DB: INSERT INTO alert_rules\n(name, condition, enabled)
+activate DB #FCE4EC
+DB --> SystemMcp: OK
+deactivate DB
+SystemMcp --> McpClient: Alert created
+deactivate SystemMcp
+McpClient --> ChatCtrl: Success
+deactivate McpClient
+
+ChatCtrl --> UI: 201 Created
+deactivate ChatCtrl
+deactivate UI
+
+legend right
+  | Color | Component |
+  |<#E1F5FE>| Frontend |
+  |<#FFF9C4>| Backend |
+  |<#FFE0B2>| LLM (Ollama) |
+  |<#F3E5F5>| MCP Servers |
+  |<#FCE4EC>| Database |
+  |<#E8F5E9>| External APIs |
+endlegend
+
+@enduml
