@@ -100,6 +100,27 @@ Services will start:
 | GET | `/api/test/weather` | Test weather MCP |
 | GET | `/actuator/health` | Health check |
 
+### Test Endpoints (Developer Debugging)
+
+The `/api/test/*` endpoints are provided by `TestController` for **developer convenience**:
+
+- **Bypass the LLM**: Test MCP tools directly without Ollama processing (faster, no AI overhead)
+- **Debug connectivity**: Quickly verify if the backend can reach each MCP server
+- **Simple GET requests**: No need to construct complex POST bodies with questions
+
+```bash
+# Test market quote directly (bypasses LLM)
+curl http://localhost:8080/api/test/market/AAPL.US
+
+# Test news search
+curl "http://localhost:8080/api/test/news?query=technology"
+
+# Test weather for Chennai
+curl "http://localhost:8080/api/test/weather?latitude=13.0827&longitude=80.2707"
+```
+
+> **Note**: These endpoints are for development/debugging only. For production AI-powered queries, use the `/api/chat` endpoint.
+
 ## How MCP Servers Work
 
 LiveContext-AI runs **4 independent MCP servers** as separate Node.js processes:
