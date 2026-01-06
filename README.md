@@ -160,10 +160,27 @@ See `docs/architecture.mmd` for a Mermaid diagram and `docs/sequence.puml` for i
 ### Swapping Data Providers
 
 **Market Data:**
-- Default: Stooq (keyless, public)
-- Option: Alpha Vantage (requires `ALPHAVANTAGE_API_KEY`)
-- Interface: `MarketDataProvider.java`
-- Implementation: `StooqMarketDataProvider.java`
+- Default: Stooq (keyless, public) - used as fallback
+- Premium: Alpha Vantage MCP (more reliable, supports more symbols)
+
+#### Setting Up AlphaVantage (Recommended)
+
+1. **Get a free API key** from [https://www.alphavantage.co/support/#api-key](https://www.alphavantage.co/support/#api-key)
+2. **Create a `.env` file** in the project root (this file is gitignored):
+   ```bash
+   # .env
+   ALPHAVANTAGE_API_KEY=your_api_key_here
+   ```
+3. **Start the Market MCP with the environment loaded**:
+   ```bash
+   # Option 1: Source .env before starting
+   source .env && cd mcp/market-mcp && npm start
+   
+   # Option 2: Use the start-all.sh script (auto-loads .env)
+   ./scripts/start-all.sh
+   ```
+
+> **How it works**: When `ALPHAVANTAGE_API_KEY` is set, Market MCP calls the [AlphaVantage MCP](https://mcp.alphavantage.co) JSON-RPC endpoint. If not set, it falls back to Stooq. The code automatically strips `.US` suffixes (e.g., `AAPL.US` → `AAPL`) for AlphaVantage compatibility.
 
 **News Data:**
 - Default: RSS feeds (configured in `application.yml`)
