@@ -107,5 +107,66 @@ describe('dbQueryReadonly (SECURITY CRITICAL)', () => {
 
             expect(result.rows).toEqual([])
         })
+
+        it('should allow columns containing keyword substrings (created_at contains CREATE)', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1, created_at: '2026-01-01' }] })
+
+            const result = await dbQueryReadonly({ query: 'SELECT id, created_at FROM events' })
+
+            expect(result.rows).toEqual([{ id: 1, created_at: '2026-01-01' }])
+            expect(result.rowCount).toBe(1)
+        })
+
+        it('should allow columns like updated_at (contains UPDATE as substring)', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1, updated_at: '2026-01-01' }] })
+
+            const result = await dbQueryReadonly({ query: 'SELECT id, updated_at FROM events' })
+
+            expect(result.rows).toEqual([{ id: 1, updated_at: '2026-01-01' }])
+        })
+
+        it('should allow columns like deleted_at (contains DELETE as substring)', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1, deleted_at: null }] })
+
+            const result = await dbQueryReadonly({ query: 'SELECT id, deleted_at FROM events' })
+
+            expect(result.rows).toEqual([{ id: 1, deleted_at: null }])
+        })
+    })
+
+    describe('LIMIT clause handling', () => {
+        it('should not add duplicate LIMIT when query already has LIMIT', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1 }] })
+
+            await dbQueryReadonly({ query: 'SELECT * FROM users LIMIT 10' })
+
+            // Verify query was passed without adding another LIMIT
+            expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users LIMIT 10')
+        })
+
+        it('should append LIMIT when query does not have one', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1 }] })
+
+            await dbQueryReadonly({ query: 'SELECT * FROM users' })
+
+            // Verify LIMIT was appended with default maxRows (100)
+            expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users LIMIT 100')
+        })
+
+        it('should append custom maxRows LIMIT when query does not have one', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1 }] })
+
+            await dbQueryReadonly({ query: 'SELECT * FROM users', maxRows: 50 })
+
+            expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users LIMIT 50')
+        })
+
+        it('should not add duplicate LIMIT with ORDER BY clause', async () => {
+            mockPool.query.mockResolvedValue({ rows: [{ id: 1 }] })
+
+            await dbQueryReadonly({ query: 'SELECT * FROM events ORDER BY created_at DESC LIMIT 10' })
+
+            expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM events ORDER BY created_at DESC LIMIT 10')
+        })
     })
 })

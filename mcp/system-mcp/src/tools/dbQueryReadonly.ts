@@ -19,14 +19,9 @@ export async function dbQueryReadonly(params: DbQueryReadonlyParams, correlation
     throw new Error('Only SELECT queries are allowed (read-only)')
   }
 
-  if (
-    normalizedQuery.includes('DELETE') ||
-    normalizedQuery.includes('UPDATE') ||
-    normalizedQuery.includes('INSERT') ||
-    normalizedQuery.includes('DROP') ||
-    normalizedQuery.includes('ALTER') ||
-    normalizedQuery.includes('CREATE')
-  ) {
+  // Use word-boundary regex to avoid false positives (e.g., CREATED_AT matching CREATE)
+  const forbiddenKeywords = /\b(DELETE|UPDATE|INSERT|DROP|ALTER|CREATE)\b/
+  if (forbiddenKeywords.test(normalizedQuery)) {
     throw new Error('Only SELECT queries are allowed (read-only)')
   }
 
@@ -46,7 +41,10 @@ export async function dbQueryReadonly(params: DbQueryReadonlyParams, correlation
   const pool = new Pool({ connectionString: databaseUrl, max: 5 })
 
   try {
-    const result = await pool.query(`${query} LIMIT ${maxRows}`)
+    // Check if query already has a LIMIT clause to avoid duplicate LIMIT
+    const hasLimit = normalizedQuery.includes('LIMIT')
+    const finalQuery = hasLimit ? query : `${query} LIMIT ${maxRows}`
+    const result = await pool.query(finalQuery)
 
     console.log(
       JSON.stringify({

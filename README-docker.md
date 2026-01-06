@@ -15,7 +15,7 @@ docker compose up --build -d
 After starting the containers for the first time, you must download the AI model:
 
 ```bash
-docker exec -it livecontext-ollama ollama pull qwen2.5:7b
+docker exec -it livecontext-ollama ollama pull qwen2.5:1.5b
 ```
 
 ## Common Commands
