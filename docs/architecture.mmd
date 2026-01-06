@@ -44,6 +44,7 @@ graph TB
 
     subgraph External ["External Data Sources"]
         Stooq["Stooq.com<br/>CSV Market Data"]
+        AlphaVantage["Alpha Vantage MCP<br/>Stock & Crypto"]
         RSS["RSS Feeds<br/>Reddit, WSJ"]
         OpenMeteo["Open-Meteo API<br/>Weather JSON"]
     end
@@ -69,6 +70,7 @@ graph TB
     McpClient -->|"HTTP POST"| SystemMcp
 
     MarketMcp -->|"CSV Fetch"| Stooq
+    MarketMcp -->|"JSON-RPC"| AlphaVantage
     NewsMcp -->|"Feed Parse"| RSS
     WeatherMcp -->|"API Call"| OpenMeteo
     SystemMcp -->|"SQL Query"| DB

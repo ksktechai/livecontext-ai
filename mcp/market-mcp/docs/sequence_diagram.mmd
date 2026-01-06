@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant User
+    participant MarketMCP
+    participant AlphaVantageClient
+    participant AlphaVantageMCP
+    participant StooqAPI
+
+    User->>MarketMCP: get_quote(symbol)
+    MarketMCP->>MarketMCP: Check ALPHAVANTAGE_API_KEY
+
+    alt Key Present
+        MarketMCP->>AlphaVantageClient: alphaVantageToolsCall("GLOBAL_QUOTE")
+        AlphaVantageClient->>AlphaVantageMCP: JSON-RPC request
+        AlphaVantageMCP-->>AlphaVantageClient: JSON-RPC response
+        AlphaVantageClient-->>MarketMCP: Result
+    else Key Missing
+        MarketMCP->>StooqAPI: fetch(stooq_url)
+        StooqAPI-->>MarketMCP: CSV response
+    end
+
+    MarketMCP-->>User: Standardized Quote

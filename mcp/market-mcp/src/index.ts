@@ -2,6 +2,7 @@ import express from 'express'
 import { getQuote } from './tools/getQuote.js'
 import { computeIndicators } from './tools/computeIndicators.js'
 import { detectAnomaly } from './tools/detectAnomaly.js'
+import { alphaVantageToolsList } from './alphaVantageMcpClient.js'
 
 const app = express()
 const PORT = process.env.PORT || 8091
@@ -10,6 +11,17 @@ app.use(express.json())
 
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'market-mcp' })
+})
+
+app.post('/tools/alphavantage_tools_list', async (req, res) => {
+  try {
+    const correlationId =
+        req.body?.correlationId ?? req.header('X-Request-Id') ?? `tools-list-${Date.now()}`
+    const result = await alphaVantageToolsList(correlationId)
+    res.json(result)
+  } catch (err: any) {
+    res.status(500).json({ error: err.message ?? String(err) })
+  }
 })
 
 app.post('/tools/get_quote', async (req, res) => {

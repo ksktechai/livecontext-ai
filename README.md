@@ -140,6 +140,7 @@ See `docs/architecture.mmd` for a Mermaid diagram and `docs/sequence.puml` for i
 
 **Market Data:**
 - Default: Stooq (keyless, public)
+- Option: Alpha Vantage (requires `ALPHAVANTAGE_API_KEY`)
 - Interface: `MarketDataProvider.java`
 - Implementation: `StooqMarketDataProvider.java`
 

@@ -71,9 +71,18 @@ livecontext:
       enabled: true
       cron: "0 */15 * * * *"
       locations:
-        - latitude: 40.7128
-          longitude: -74.0060
+        - latitude: 13.0827
+          longitude: 80.2707
           name: "Chennai"
+        - latitude: -36.8509
+          longitude: 174.7645
+          name: "Auckland"
+        - latitude: 1.3521
+          longitude: 103.8198
+          name: "Singapore"
+        - latitude: -33.8688
+          longitude: 151.2093
+          name: "Sydney"
 
   retention:
     timeline-days: 7

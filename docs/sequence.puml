@@ -1,5 +1,5 @@
-@startuml LiveContext Full System Flow
-!theme plain
+@startuml LiveContext_Full_System_Flow
+' Note: !theme plain removed for compatibility with older PlantUML versions
 skinparam sequenceMessageAlign center
 skinparam maxMessageSize 200
 
@@ -40,6 +40,7 @@ participant "Weather MCP\n:8093" as WeatherMcp <<mcp>>
 participant "System MCP\n:8094" as SystemMcp <<mcp>>
 database "PostgreSQL" as DB <<db>>
 participant "Stooq API" as Stooq <<external>>
+participant "Alpha Vantage MCP" as AVMcp <<external>>
 participant "RSS Feeds" as RSS <<external>>
 participant "Open-Meteo" as OpenMeteo <<external>>
 
@@ -54,7 +55,7 @@ group Market Ingestion (Every 1 min)
     McpClient -> MarketMcp: POST /tools/get_quote\n{symbol: "TSLA.US"}
     activate MarketMcp #F3E5F5
     
-    MarketMcp -> Stooq: GET /q/d/l/?s=tsla.us&i=d
+    MarketMcp -> Stooq: GET /q/d/l/?s=tsla.us&i=d (Or AlphaVantage)
     activate Stooq #E8F5E9
     Stooq --> MarketMcp: CSV data
     deactivate Stooq
@@ -156,10 +157,19 @@ LlmSvc -> McpClient: executeToolByName("get_quote")
 activate McpClient #FFF9C4
 McpClient -> MarketMcp: POST /tools/get_quote
 activate MarketMcp #F3E5F5
-MarketMcp -> Stooq: Fetch quote
-activate Stooq #E8F5E9
-Stooq --> MarketMcp: Data
-deactivate Stooq
+
+alt "API Key Present"
+    MarketMcp -> AVMcp: JSON-RPC Call
+    activate AVMcp
+    AVMcp --> MarketMcp: JSON Result
+    deactivate AVMcp
+else "Fallback"
+    MarketMcp -> Stooq: Fetch quote
+    activate Stooq
+    Stooq --> MarketMcp: Data
+    deactivate Stooq
+end
+
 MarketMcp --> McpClient: Quote result
 deactivate MarketMcp
 McpClient --> LlmSvc: {close: 432.50, change: +2.5%}

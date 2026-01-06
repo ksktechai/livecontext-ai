@@ -1,0 +1,21 @@
+@startuml component_diagram
+' Note: !theme plain removed for compatibility with older PlantUML versions
+skinparam componentStyle uml2
+
+package "Market MCP" {
+  [Tools Interface] as Tools
+  [Get Quote Tool] as GetQuote
+  [Alpha Vantage Client] as AVClient
+}
+
+cloud "External Services" {
+  [Alpha Vantage MCP] as AVMCP
+  [Stooq API] as Stooq
+}
+
+Tools --> GetQuote
+GetQuote ..> AVClient : Use if API Key set
+GetQuote ..> Stooq : Fallback
+
+AVClient --> AVMCP : JSON-RPC
+@enduml
