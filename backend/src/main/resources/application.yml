@@ -65,7 +65,7 @@ livecontext:
       feeds: https://www.reddit.com/r/artificial/.rss,https://feeds.a.dj.com/rss/RSSMarketsMain.xml
     market:
       enabled: true
-      cron: "0 */1 * * * *"
+      cron: "0 */5 * * * *"
       symbols: AAPL.US,TSLA.US,GOOGL.US
     weather:
       enabled: true
