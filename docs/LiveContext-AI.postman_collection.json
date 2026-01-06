@@ -1,0 +1,1125 @@
+{
+    "info": {
+        "name": "LiveContext-AI API Collection",
+        "description": "Complete API test collection for LiveContext-AI platform. Includes Backend API and all MCP servers (Market, News, Weather, System).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "backend_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "market_mcp_url",
+            "value": "http://localhost:8091",
+            "type": "string"
+        },
+        {
+            "key": "news_mcp_url",
+            "value": "http://localhost:8092",
+            "type": "string"
+        },
+        {
+            "key": "weather_mcp_url",
+            "value": "http://localhost:8093",
+            "type": "string"
+        },
+        {
+            "key": "system_mcp_url",
+            "value": "http://localhost:8094",
+            "type": "string"
+        },
+        {
+            "key": "ollama_url",
+            "value": "http://localhost:11434",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Backend API",
+            "description": "Spring Boot backend API endpoints",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/actuator/health",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "actuator",
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Chat - Ask Question",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{backend_url}}/api/chat",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"question\": \"What is the current price of AAPL stock?\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Chat - Weather Question",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{backend_url}}/api/chat",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"question\": \"What is the weather in Chennai, Singapore, and Sydney?\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Chat - News Question",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{backend_url}}/api/chat",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"question\": \"What are the latest news about artificial intelligence?\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Alerts - Create Alert",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{backend_url}}/api/alerts",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "alerts"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"AAPL Price Alert\",\n  \"condition\": \"price > 270\",\n  \"enabled\": true\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Alerts - Get All Alerts",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/alerts",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "alerts"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Timeline - Get Recent Events",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/timeline/recent",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "timeline",
+                                "recent"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Stream - SSE Timeline",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/stream",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "stream"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/event-stream"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Test - Market Quote",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/test/market/AAPL.US",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "test",
+                                "market",
+                                "AAPL.US"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Test - News Search",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/test/news?query=technology",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "test",
+                                "news"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "technology"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Test - Weather Forecast",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/test/weather?latitude=13.0827&longitude=80.2707",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "test",
+                                "weather"
+                            ],
+                            "query": [
+                                {
+                                    "key": "latitude",
+                                    "value": "13.0827"
+                                },
+                                {
+                                    "key": "longitude",
+                                    "value": "80.2707"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Test - Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/api/test/health",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "test",
+                                "health"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Market MCP",
+            "description": "Market MCP server endpoints (port 8091)",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/health",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Quote - AAPL",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/get_quote",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_quote"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"symbol\": \"AAPL.US\"\n  },\n  \"correlationId\": \"test-aapl-quote\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Quote - TSLA",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/get_quote",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_quote"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"symbol\": \"TSLA.US\"\n  },\n  \"correlationId\": \"test-tsla-quote\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Quote - GOOGL",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/get_quote",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_quote"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"symbol\": \"GOOGL.US\"\n  },\n  \"correlationId\": \"test-googl-quote\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Compute Indicators",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/compute_indicators",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "compute_indicators"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"symbol\": \"AAPL.US\",\n    \"indicators\": [\"sma\", \"ema\", \"rsi\"]\n  },\n  \"correlationId\": \"test-indicators\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Detect Anomaly",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/detect_anomaly",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "detect_anomaly"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"symbol\": \"AAPL.US\",\n    \"threshold\": 2.0\n  },\n  \"correlationId\": \"test-anomaly\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "AlphaVantage Tools List",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/tools/alphavantage_tools_list",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "alphavantage_tools_list"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"correlationId\": \"test-av-tools-list\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "News MCP",
+            "description": "News MCP server endpoints (port 8092)",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{news_mcp_url}}/health",
+                            "host": [
+                                "{{news_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Ingest RSS - Reddit AI",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{news_mcp_url}}/tools/ingest_rss",
+                            "host": [
+                                "{{news_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "ingest_rss"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"feedUrl\": \"https://www.reddit.com/r/artificial/.rss\"\n  },\n  \"correlationId\": \"test-rss-ingest\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Search News",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{news_mcp_url}}/tools/search",
+                            "host": [
+                                "{{news_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "search"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"query\": \"artificial intelligence\",\n    \"limit\": 10\n  },\n  \"correlationId\": \"test-news-search\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Analyze Sentiment",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{news_mcp_url}}/tools/analyze_sentiment",
+                            "host": [
+                                "{{news_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "analyze_sentiment"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"text\": \"The stock market is showing strong bullish momentum with tech stocks leading the rally.\"\n  },\n  \"correlationId\": \"test-sentiment\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Weather MCP",
+            "description": "Weather MCP server endpoints (port 8093)",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/health",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Forecast - Chennai",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/tools/get_forecast",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_forecast"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"correlationId\": \"test-chennai-weather\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Forecast - Auckland",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/tools/get_forecast",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_forecast"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"latitude\": -36.8509,\n    \"longitude\": 174.7645\n  },\n  \"correlationId\": \"test-auckland-weather\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Forecast - Singapore",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/tools/get_forecast",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_forecast"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"latitude\": 1.3521,\n    \"longitude\": 103.8198\n  },\n  \"correlationId\": \"test-singapore-weather\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Forecast - Sydney",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/tools/get_forecast",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_forecast"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"latitude\": -33.8688,\n    \"longitude\": 151.2093\n  },\n  \"correlationId\": \"test-sydney-weather\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Alerts",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/tools/get_alerts",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "get_alerts"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"latitude\": 13.0827,\n    \"longitude\": 80.2707\n  },\n  \"correlationId\": \"test-weather-alerts\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "System MCP",
+            "description": "System MCP server endpoints (port 8094)",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/health",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Alert Rule",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/tools/alerts_create",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "alerts_create"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"name\": \"High Temperature Alert\",\n    \"condition\": \"temperature > 35\",\n    \"enabled\": true\n  },\n  \"correlationId\": \"test-create-alert\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "DB Query - Select Timeline Events",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/tools/db_query_readonly",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "db_query_readonly"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"query\": \"SELECT id, event_type, created_at FROM timeline_events ORDER BY created_at DESC LIMIT 10\"\n  },\n  \"correlationId\": \"test-db-query\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "DB Query - Select News Items",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/tools/db_query_readonly",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "db_query_readonly"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"query\": \"SELECT id, title, source, published_at FROM news_items ORDER BY published_at DESC LIMIT 10\"\n  },\n  \"correlationId\": \"test-db-query-news\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "DB Query - Select Alert Rules",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/tools/db_query_readonly",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "tools",
+                                "db_query_readonly"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"parameters\": {\n    \"query\": \"SELECT id, name, condition, enabled FROM alert_rules ORDER BY created_at DESC\"\n  },\n  \"correlationId\": \"test-db-query-alerts\"\n}"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "All Health Checks",
+            "description": "Quick health check for all services",
+            "item": [
+                {
+                    "name": "Backend Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{backend_url}}/actuator/health",
+                            "host": [
+                                "{{backend_url}}"
+                            ],
+                            "path": [
+                                "actuator",
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Market MCP Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{market_mcp_url}}/health",
+                            "host": [
+                                "{{market_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "News MCP Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{news_mcp_url}}/health",
+                            "host": [
+                                "{{news_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Weather MCP Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{weather_mcp_url}}/health",
+                            "host": [
+                                "{{weather_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "System MCP Health",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{system_mcp_url}}/health",
+                            "host": [
+                                "{{system_mcp_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Ollama LLM API",
+            "description": "Direct Ollama LLM API endpoints (port 11434). Used by the backend for AI chat.",
+            "item": [
+                {
+                    "name": "List Local Models",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/tags",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "tags"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Show Model Info",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/show",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "show"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"qwen2.5:7b\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Generate (Non-streaming)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/generate",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "generate"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"model\": \"qwen2.5:7b\",\n  \"prompt\": \"What is the capital of France?\",\n  \"stream\": false\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Chat (Non-streaming)",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/chat",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"model\": \"qwen2.5:7b\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful assistant.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the weather like today?\"\n    }\n  ],\n  \"stream\": false\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Chat with Tools",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/chat",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"model\": \"qwen2.5:7b\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the current price of AAPL stock?\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"get_quote\",\n        \"description\": \"Get current stock quote for a symbol\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"symbol\": {\n              \"type\": \"string\",\n              \"description\": \"Stock symbol like AAPL.US, TSLA.US\"\n            }\n          },\n          \"required\": [\"symbol\"]\n        }\n      }\n    }\n  ],\n  \"stream\": false\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Generate Embeddings",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/embeddings",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "embeddings"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"model\": \"qwen2.5:7b\",\n  \"prompt\": \"The stock market is showing strong momentum today.\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Check Running Models",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/ps",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "ps"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Health Check (Version)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{ollama_url}}/api/version",
+                            "host": [
+                                "{{ollama_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "version"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}
