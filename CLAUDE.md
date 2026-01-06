@@ -1,4 +1,4 @@
-# LiveContext-AI — Implementation Reference (CLAUDE_V2)
+# LiveContext-AI — Implementation Reference (CLAUDE)
 
 This document reflects the **actual implementation** of `livecontext-ai` as of January 2026.
 
